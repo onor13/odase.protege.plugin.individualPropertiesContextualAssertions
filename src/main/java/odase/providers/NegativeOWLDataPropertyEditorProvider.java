@@ -1,0 +1,41 @@
+package odase.providers;
+
+import odase.editor.*;
+import odase.frame.IOWLPropertiesStackBoxLine;
+import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.owlapi.model.*;
+
+/**
+ * Created by vblagodarov on 04-07-17.
+ */
+public class NegativeOWLDataPropertyEditorProvider extends OWLBaseDataPropertyEditorProvider implements IPropertyEditorProvider<OWLDataProperty, OWLLiteral> {
+
+    public NegativeOWLDataPropertyEditorProvider(OWLEditorKit owlEditorKit) {
+        super(owlEditorKit);
+    }
+
+    @Override
+    public IPropertyValueAssertionEditor<OWLLiteral> getNewEditor(OWLNamedIndividual subjectIndividual,
+                                                                  OWLDataProperty property) {
+        return new NegativeOWLDataPropertyAssertion(editorKit, subjectIndividual, property);
+    }
+
+    @Override
+    public IPropertyValueAssertionEditor<OWLLiteral> getNewEditor(OWLNamedIndividual subjectIndividual,
+                                                                  OWLDataProperty property,
+                                                                  OWLLiteral object) {
+        return new NegativeOWLDataPropertyAssertion(editorKit, subjectIndividual, property, object);
+    }
+
+    @Override
+    public void updateInnerComponent(IOWLPropertiesStackBoxLine innerComponent,
+                                     OWLNamedIndividual subject,
+                                     OWLDataProperty property) {
+        super.updateInnerComponent(innerComponent, subject, property, AxiomType.NEGATIVE_DATA_PROPERTY_ASSERTION);
+    }
+
+    @Override
+    public String getTitle(OWLNamedIndividual subject, OWLDataProperty property) {
+        return editorKit.getOWLModelManager().getRendering(subject) + ": Negative Data property " + editorKit.getOWLModelManager().getRendering(property) + " assertion";
+    }
+}

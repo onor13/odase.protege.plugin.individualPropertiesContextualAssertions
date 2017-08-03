@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?eclipse version="3.0"?>
+
+<plugin>
+
+	<!-- View -->
+	<extension id="IndividualPropertiesContextualAssertions" point="org.protege.editor.core.application.ViewComponent">
+		<label value="Properties contextual assertions" />
+		<class value="odase.view.IndividualPropertiesContextualAssertions" />
+		<headerColor value="@org.protege.individualcolor"/>
+		<category value="@org.protege.individualcategory"/>
+	</extension>
+    
+</plugin>

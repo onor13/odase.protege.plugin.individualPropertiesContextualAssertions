@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>odase</groupId>
+	<artifactId>org.odase.protege.plugin.individualPropertiesContextualAssertions</artifactId>
+	<version>1.0.0</version>
+	<packaging>bundle</packaging>
+
+	<name>Individual Properties Contextual Assertions</name>
+	<description>
+		The view offers a more comfortable way to make individual properties assertions compared to the default
+		Protégé "Property Assertions" view. By default this view will show in domain properties with the possibility
+		to switch to all properties and the corresponding asserted and inferred individuals.
+		If you click on one of the properties the list of asserted/inferred individual will be displayed.
+		If the property is grayed, it means that the list of individuals is empty.
+		The object/data properties assertions are available from the "add" button located next to each object/data properties.
+		If the "add" button is red (=disabled), it means you are dealing with a functional property already containing an individual.
+		The object property assertion can be done either by double click on one or multiple individuals in the displayed tree or by entering
+		their name directly (auto-completion is available) which will result in adding them to a temporary list.
+		The same double click allows to remove the individuals from the list. If the individual doesn't exist yet, it
+		can be created from the same window using a right click on one of the OWLClasses from tree view.
+	</description>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+  	
+	<dependencies>
+        <dependency>
+			<groupId>edu.stanford.protege</groupId>
+            <artifactId>protege-editor-owl</artifactId>
+			<version>5.0.0</version>
+        </dependency>
+		<dependency>
+			<groupId>org.swinglabs.swingx</groupId>
+			<artifactId>swingx-all</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+
+		<resources>
+			<resource>
+				<!-- Use resource filtering to replace references to the artifactId in the plugin.xml file -->
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.swinglabs.swingx</groupId>
+				<artifactId>swingx-all</artifactId>
+				<version>1.6.4</version>
+			</plugin>
+            
+            <plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>3.0.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-Activator>org.protege.editor.owl.ProtegeOWL</Bundle-Activator>
+						<Bundle-ClassPath>.</Bundle-ClassPath>
+						<Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
+						<Bundle-Vendor>The ODASE Development Team</Bundle-Vendor>
+						<Import-Package>
+							org.protege.editor.owl.*;version="5.0.0",<!-- equivalent to [4.3,infinity) -->
+							*
+						</Import-Package>
+						<Embed-Dependency>
+							swingx-*
+						</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+					</instructions>
+				</configuration>
+            </plugin>
+		</plugins>
+	</build>
+</project>
