@@ -12,6 +12,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.semanticweb.owlapi.reasoner.structural.StructuralReasoner;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by vblagodarov on 13-06-17.
@@ -46,16 +47,14 @@ public class OWLDataInDomainRange {
 
     }
 
-    public OWLClass getIndividualType(OWLNamedIndividual individual) {
+    public Set<OWLClass> getIndividualType(OWLNamedIndividual individual) {
+        Set<OWLClass> classes = new HashSet<>();
         for (OWLOntology ont : editorKit.getModelManager().getActiveOntologies()) {
-            Optional<OWLIndividualAxiom> result = ont.getAxioms(individual, Imports.INCLUDED).stream().
-                    filter(a -> a.getAxiomType() == AxiomType.CLASS_ASSERTION).findFirst();
-            if (result.isPresent()) {
-                OWLClassAssertionAxiom classAssertionAxiom = (OWLClassAssertionAxiom) result.get();
-                return classAssertionAxiom.getClassExpression().asOWLClass();
-            }
+            Set<OWLIndividualAxiom> axioms = ont.getAxioms(individual, Imports.INCLUDED).stream().
+                    filter(a -> a.getAxiomType() == AxiomType.CLASS_ASSERTION).collect(Collectors.toSet());
+            axioms.forEach(a -> classes.addAll(((OWLClassAssertionAxiom) a).getClassExpression().getClassesInSignature()));
         }
-        return null;
+        return classes;
     }
 
     public Collection<OWLPropertyAssertionAxiomPlusIsInferred> getIndividualObjects(OWLNamedIndividual subject, OWLObjectProperty property, AxiomType filterType) {
@@ -210,7 +209,7 @@ public class OWLDataInDomainRange {
 
     public Set<OWLObjectProperty> getIndividualObjectProperties(OWLNamedIndividual individual) {
         Set<OWLObjectProperty> resultSet = new HashSet<>();
-        OWLClass indClassExp = getIndividualType(individual);
+        Set<OWLClass> indClassExps = getIndividualType(individual);
 
         Map<OWLPropertyExpression, OWLClassExpression> domains = new HashMap<>();
         for (OWLPropertyDomainAxiom axiom : editorKit.getModelManager().getActiveOntology().
@@ -230,10 +229,12 @@ public class OWLDataInDomainRange {
             return resultSet;
         }
 
-        for (OWLPropertyExpression p : domains.keySet()) {
-            if ((reasoner.getSubClasses(domains.get(p), false).containsEntity(indClassExp) ||
-                    reasoner.getEquivalentClasses(domains.get(p)).contains(indClassExp)) && p.isObjectPropertyExpression()) {
-                resultSet.addAll(p.getObjectPropertiesInSignature());
+        for(OWLClass indClassExp : indClassExps){
+            for (OWLPropertyExpression p : domains.keySet()) {
+                if ((reasoner.getSubClasses(domains.get(p), false).containsEntity(indClassExp) ||
+                        reasoner.getEquivalentClasses(domains.get(p)).contains(indClassExp)) && p.isObjectPropertyExpression()) {
+                    resultSet.addAll(p.getObjectPropertiesInSignature());
+                }
             }
         }
 
@@ -244,7 +245,7 @@ public class OWLDataInDomainRange {
         Set<OWLDataProperty> resultSet = new HashSet<>();
 
 
-        OWLClass indClassExp = getIndividualType(individual);
+        Set<OWLClass> indClassExps = getIndividualType(individual);
 
         Map<OWLPropertyExpression, OWLClassExpression> domains = new HashMap<>();
         for (OWLOntology ont : editorKit.getModelManager().getActiveOntologies()) {
@@ -264,10 +265,13 @@ public class OWLDataInDomainRange {
         if (!reasoner.isConsistent()) {
             return resultSet;
         }
-        for (OWLPropertyExpression p : domains.keySet()) {
-            if ((reasoner.getSubClasses(domains.get(p), false).containsEntity(indClassExp) ||
-                    reasoner.getEquivalentClasses(domains.get(p)).contains(indClassExp)) && p.isDataPropertyExpression()) {
-                resultSet.addAll(p.getDataPropertiesInSignature());
+
+        for(OWLClass indClassExp : indClassExps){
+            for (OWLPropertyExpression p : domains.keySet()) {
+                if ((reasoner.getSubClasses(domains.get(p), false).containsEntity(indClassExp) ||
+                        reasoner.getEquivalentClasses(domains.get(p)).contains(indClassExp)) && p.isDataPropertyExpression()) {
+                    resultSet.addAll(p.getDataPropertiesInSignature());
+                }
             }
         }
 
