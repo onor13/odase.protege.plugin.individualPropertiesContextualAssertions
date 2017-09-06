@@ -163,31 +163,30 @@ public class OWLPropertiesStackedBox extends JPanel implements Scrollable, Actio
     }
 
     private void refreshView(List<? extends OWLOntologyChange> changes) {
-        changes.forEach(change -> {
-            if (change.getOntology().equals(editorKit.getOWLModelManager().getActiveOntology()) &&
-                    change.getAxiom() instanceof OWLPropertyAssertionAxiom) {
-                OWLPropertyAssertionAxiom propertyAssertionAxiom = (OWLPropertyAssertionAxiom) change.getAxiom();
-                for (Map.Entry<IPropertyValueAssertionDetails, StackedBoxLineSaved> mapEntry : rows.entrySet()) {
-                    IPropertyValueAssertionDetails details = mapEntry.getKey();
-                    StackedBoxLineSaved info = mapEntry.getValue();
-                    if (details.getSubject().equals(propertyAssertionAxiom.getSubject())) {
-                        //&& !info.collapsible.isCollapsed()){
-                        innerComponentProvider.updateInnerComponent(info, details.getSubject(), details.getProperty());
-                        //Some of the values are retrieved using Reasoner, which is not always synchronized.
-                        //So if we removing the axiom explicitly;
-                        if (details.getProperty().equals(propertyAssertionAxiom.getProperty())
-                                && change.isRemoveAxiom()) {
-                            DefaultListModel lm = (DefaultListModel) info.getList().getModel();
-                            lm.removeElement(info.getList().create(editorKit.getModelManager(), propertyAssertionAxiom, false));
-                            if (innerComponentProvider.canAddToInnerList(details.getSubject(), details.getProperty())) {
-                                info.getButton().setUI(new EnabledAddButtonUI());
-                            } else {
-                                info.getButton().setUI(new DisabledAddButtonUI());
-                            }
+        changes.stream().filter(change -> change.getOntology().equals(editorKit.getOWLModelManager().getActiveOntology()) &&
+                (change.getAxiom().isOfType(AxiomType.OBJECT_PROPERTY_ASSERTION) || change.getAxiom().isOfType(AxiomType.DATA_PROPERTY_ASSERTION))).forEach(change -> {
+            OWLPropertyAssertionAxiom propertyAssertionAxiom = (OWLPropertyAssertionAxiom) change.getAxiom();
+            for (Map.Entry<IPropertyValueAssertionDetails, StackedBoxLineSaved> mapEntry : rows.entrySet()) {
+                IPropertyValueAssertionDetails details = mapEntry.getKey();
+                StackedBoxLineSaved info = mapEntry.getValue();
+                if (details.getSubject().equals(propertyAssertionAxiom.getSubject())) {
+                    //&& !info.collapsible.isCollapsed()){
+                    innerComponentProvider.updateInnerComponent(info, details.getSubject(), details.getProperty());
+                    //Some of the values are retrieved using Reasoner, which is not always synchronized.
+                    //So if we removing the axiom explicitly;
+                    if (details.getProperty().equals(propertyAssertionAxiom.getProperty())
+                            && change.isRemoveAxiom()) {
+                        DefaultListModel lm = (DefaultListModel) info.getList().getModel();
+                        lm.removeElement(info.getList().create(editorKit.getModelManager(), propertyAssertionAxiom, false));
+                        if (innerComponentProvider.canAddToInnerList(details.getSubject(), details.getProperty())) {
+                            info.getButton().setUI(new EnabledAddButtonUI());
+                        } else {
+                            info.getButton().setUI(new DisabledAddButtonUI());
                         }
                     }
                 }
             }
+
         });
     }
 

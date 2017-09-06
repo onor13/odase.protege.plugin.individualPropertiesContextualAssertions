@@ -7,15 +7,14 @@ import org.jdesktop.swingx.VerticalLayout;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.inference.ReasonerStatus;
 import org.protege.editor.owl.ui.view.individual.AbstractOWLIndividualViewComponent;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by vblagodarov on 16-06-17.
@@ -29,9 +28,12 @@ public class IndividualPropertiesContextualAssertions extends AbstractOWLIndivid
     private JTextField statusBar;
     private JPanel mainPanel;
     private JScrollPane propertiesPane;
+    private OWLOntologyChangeListener ontologyChangeListener;
+    private OWLNamedIndividual lastSelectedIndividual=null;
 
     @Override
     public OWLNamedIndividual updateView(OWLNamedIndividual individual) {
+        lastSelectedIndividual = individual;
         refreshView(individual);
         if (individual != null) {
             updateReasonerInfo();
@@ -47,6 +49,10 @@ public class IndividualPropertiesContextualAssertions extends AbstractOWLIndivid
         statusBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, statusBar.getPreferredSize().height));
 
         OWLEditorKit editorKit = getOWLEditorKit();
+        ontologyChangeListener = changes -> {
+            refreshView(changes);
+        };
+        editorKit.getOWLModelManager().addOntologyChangeListener(ontologyChangeListener);
         propertiesProvider = new InDomainPropertiesProvider(editorKit);
 
 
@@ -66,6 +72,19 @@ public class IndividualPropertiesContextualAssertions extends AbstractOWLIndivid
         add(statusBar, BorderLayout.PAGE_END);
     }
 
+    private void refreshView(java.util.List<? extends OWLOntologyChange> changes) {
+        if(lastSelectedIndividual == null){
+            return;
+        }
+        Set<OWLOntologyChange> classAssertionChanges =changes.stream().filter(change -> change.getAxiom().isOfType(AxiomType.CLASS_ASSERTION)).collect(Collectors.toSet());
+        for(OWLOntologyChange oc : classAssertionChanges){
+            OWLClassAssertionAxiom caa = (OWLClassAssertionAxiom) oc.getAxiom();
+            if(lastSelectedIndividual.equals(caa.getIndividual())){
+                refreshView(lastSelectedIndividual);
+                break;
+            }
+        }
+    }
     private void updateReasonerInfo() {
         ReasonerStatus status = getOWLEditorKit().getOWLModelManager().getOWLReasonerManager().getReasonerStatus();
         if (status.equals(ReasonerStatus.INITIALIZED) ||
@@ -227,6 +246,7 @@ public class IndividualPropertiesContextualAssertions extends AbstractOWLIndivid
 
     @Override
     public void disposeView() {
+        getOWLEditorKit().getOWLModelManager().removeOntologyChangeListener(ontologyChangeListener);
         objectPropertiesComponent.dispose();
         dataPropertiesComponent.dispose();
     }
