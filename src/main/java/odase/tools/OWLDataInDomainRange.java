@@ -210,8 +210,8 @@ public class OWLDataInDomainRange {
     public Set<OWLObjectProperty> getIndividualObjectProperties(OWLNamedIndividual individual) {
         Set<OWLObjectProperty> resultSet = new HashSet<>();
         Set<OWLClass> indClassExps = getIndividualType(individual);
-
         Map<OWLPropertyExpression, OWLClassExpression> domains = new HashMap<>();
+
         for (OWLPropertyDomainAxiom axiom : editorKit.getModelManager().getActiveOntology().
                 getAxioms(AxiomType.OBJECT_PROPERTY_DOMAIN, Imports.INCLUDED)) {
             OWLPropertyExpression pe = axiom.getProperty();
@@ -243,23 +243,22 @@ public class OWLDataInDomainRange {
 
     public Set<OWLDataProperty> getIndividualDataProperties(OWLNamedIndividual individual) {
         Set<OWLDataProperty> resultSet = new HashSet<>();
-
-
         Set<OWLClass> indClassExps = getIndividualType(individual);
-
         Map<OWLPropertyExpression, OWLClassExpression> domains = new HashMap<>();
-        for (OWLOntology ont : editorKit.getModelManager().getActiveOntologies()) {
-            for (OWLPropertyDomainAxiom axiom : ont.getAxioms(AxiomType.DATA_PROPERTY_DOMAIN, Imports.INCLUDED)) {
-                OWLPropertyExpression pe = axiom.getProperty();
-                if (!domains.containsKey(pe)) {
-                    domains.put(pe, axiom.getDomain());
-                } else {
-                    Set<OWLClassExpression> set = new HashSet<>(domains.get(pe).asConjunctSet());
-                    set.add(axiom.getDomain());
-                    domains.put(pe, editorKit.getOWLModelManager().getOWLDataFactory().getOWLObjectIntersectionOf(set));
-                }
+
+
+        for (OWLPropertyDomainAxiom axiom : editorKit.getModelManager().getActiveOntology().
+                getAxioms(AxiomType.DATA_PROPERTY_DOMAIN, Imports.INCLUDED)) {
+            OWLPropertyExpression pe = axiom.getProperty();
+            if (!domains.containsKey(pe)) {
+                domains.put(pe, axiom.getDomain());
+            } else {
+                Set<OWLClassExpression> set = new HashSet<>(domains.get(pe).asConjunctSet());
+                set.add(axiom.getDomain());
+                domains.put(pe, editorKit.getOWLModelManager().getOWLDataFactory().getOWLObjectIntersectionOf(set));
             }
         }
+
 
         OWLReasoner reasoner = getReasoner();
         if (!reasoner.isConsistent()) {
