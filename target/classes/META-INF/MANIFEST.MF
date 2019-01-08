@@ -23,8 +23,8 @@ Bundle-Description: The view offers a more comfortable way to make indiv
   a right click on one of the OWLClasses from tree view.
 Bundle-ManifestVersion: 2
 Bundle-Name: Individual Properties Contextual Assertions
-Bundle-SymbolicName: org.odase.protege.plugin.individualPropertiesContex
- tualAssertions;singleton:=true
+Bundle-SymbolicName: org.odase.protege.individualPropertiesContextualAss
+ ertions;singleton:=true
 Bundle-Vendor: The ODASE Development Team
 Bundle-Version: 1.0.0
 Created-By: Apache Maven Bundle Plugin
