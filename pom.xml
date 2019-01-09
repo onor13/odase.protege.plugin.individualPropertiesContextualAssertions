@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<groupId>odase</groupId>
-	<artifactId>org.odase.protege.plugin.individualPropertiesContextualAssertions</artifactId>
+	<artifactId>org.odase.protege.individualPropertiesContextualAssertions</artifactId>
 	<version>1.0.2</version>
 	<packaging>bundle</packaging>
 
